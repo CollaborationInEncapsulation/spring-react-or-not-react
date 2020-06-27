@@ -1,7 +1,10 @@
 package io.rsocket.examples.starter.speed.configuration;
 
+import java.net.URI;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,6 +14,7 @@ import java.util.function.Supplier;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.netflix.concurrency.limits.limit.VegasLimit;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bucket4j;
@@ -22,17 +26,28 @@ import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.rsocket.examples.common.control.DefaultLeaseReceiver;
 import io.rsocket.examples.common.control.DistributedConcurrencyLimitedWorker;
 import io.rsocket.examples.common.control.ErrorStrategy;
+import io.rsocket.examples.common.control.LeaseReceiver;
+import io.rsocket.examples.common.control.LeaseWaitingRSocket;
 import io.rsocket.examples.common.control.OverflowStrategy;
 import io.rsocket.examples.common.control.RateLimitedWorker;
 import io.rsocket.examples.common.control.SimpleWorker;
+import io.rsocket.examples.common.control.VegaLimitLeaseSender;
+import io.rsocket.examples.common.control.VegaLimitLeaseStats;
 import io.rsocket.examples.common.control.WaitFreeInstrumentedPool;
 import io.rsocket.examples.common.control.Worker;
 import io.rsocket.examples.common.processing.Delayer;
 import io.rsocket.examples.starter.speed.AdjustmentProperties;
+import io.rsocket.core.RSocketConnector;
+import io.rsocket.lease.Leases;
+import io.rsocket.metadata.WellKnownMimeType;
+import io.rsocket.plugins.RSocketInterceptor;
+import io.rsocket.transport.netty.client.WebsocketClientTransport;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.pool.InstrumentedPool;
 import reactor.pool.PoolBuilder;
 import reactor.util.retry.Retry;
@@ -41,9 +56,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.hazelcast.HazelcastInstanceFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.rsocket.server.RSocketServerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.messaging.rsocket.RSocketStrategies;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
+
+import static io.rsocket.examples.starter.speed.configuration.RSocketRequesterSetupUtility.getDataMimeType;
 
 /**
  * @author Evgeny Borisov
@@ -55,10 +76,66 @@ import org.springframework.web.reactive.function.client.WebClient;
 @EnableConfigurationProperties(AdjustmentProperties.class)
 public class BaseConfiguration {
 
+	static final ThreadLocal<LeaseReceiver> LEASE_RECEIVER = new ThreadLocal<>();
+
 	@Bean
-	public WebClient webClient(WebClient.Builder webClientBuilder, AdjustmentProperties adjustmentProperties) {
-		return webClientBuilder.baseUrl(adjustmentProperties.getReceiver().getBaseUrl())
-		                       .build();
+	public Mono<RSocketRequester> rSocketRequester(
+			RSocketStrategies rSocketStrategies,
+			AdjustmentProperties adjustmentProperties) {
+		MimeType dataMimeType = getDataMimeType(rSocketStrategies);
+		MimeType metadataMimeType =
+				MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
+		return RSocketConnector
+				.create()
+				.interceptors(ir -> ir.forRequester((RSocketInterceptor) r -> new LeaseWaitingRSocket(r, LEASE_RECEIVER.get())))
+				.lease(() -> {
+					UUID uuid = UUID.randomUUID();
+					DefaultLeaseReceiver leaseReceiver = new DefaultLeaseReceiver(uuid);
+
+					LEASE_RECEIVER.set(leaseReceiver);
+					return Leases.create()
+					             .receiver(leaseReceiver);
+				})
+				.dataMimeType(dataMimeType.toString())
+				.metadataMimeType(metadataMimeType.toString())
+				.reconnect(
+						Retry.backoff(Long.MAX_VALUE, Duration.ofMillis(100))
+						     .maxBackoff(Duration.ofSeconds(5))
+				)
+				.connect(WebsocketClientTransport.create(URI.create(adjustmentProperties.getReceiver().getBaseUrl() + "rsocket")))
+				.map(rsocket -> RSocketRequester.wrap(
+					rsocket,
+					dataMimeType,
+					metadataMimeType,
+					rSocketStrategies
+				));
+	}
+
+	@Bean
+	public RSocketServerCustomizer rSocketServerCustomizer(AdjustmentProperties properties, VegaLimitLeaseSender leaseSender) {
+		return rSocketServer -> rSocketServer
+				.lease(() ->
+					Leases.create()
+					      .sender(leaseSender)
+					      .stats(new VegaLimitLeaseStats(
+					      		UUID.randomUUID(),
+					      		leaseSender,
+						        VegasLimit.newBuilder()
+						                  .initialLimit(1)
+						                  .maxConcurrency(properties.getProcessing().getConcurrencyLevel())
+						                  .build()
+					      ))
+				);
+	}
+
+	@Bean
+	public VegaLimitLeaseSender vegaLeaseSender(AdjustmentProperties properties) {
+		AdjustmentProperties.ProcessingProperties processingProperties = properties.getProcessing();
+		return new VegaLimitLeaseSender(
+				processingProperties.getConcurrencyLevel(),
+				processingProperties.getTime(),
+				Schedulers.newSingle("lease-sender").createWorker()
+		);
 	}
 
 	@Bean
@@ -109,7 +186,7 @@ public class BaseConfiguration {
 			PoolBuilder
 				.from(Mono.fromSupplier(workerSupplier))
 				.maxPendingAcquire(processingProperties.getQueueSize())
-				.sizeBetween(1, processingProperties.getConcurrencyLevel())
+				.sizeBetween(processingProperties.getConcurrencyLevel(), processingProperties.getConcurrencyLevel())
 				.evictionPredicate((wc, metadata) -> false)
 				.lifo();
 
