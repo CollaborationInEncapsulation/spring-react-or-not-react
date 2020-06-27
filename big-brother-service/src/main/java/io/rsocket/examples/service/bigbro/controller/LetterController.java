@@ -31,7 +31,7 @@ public class LetterController {
 			           .log(letter.getContent())
 				   ))
 		           .then()
-		           .onErrorMap(t -> new IllegalStateException("Too Many Requests"));
+		           .onErrorMap(t -> new IllegalStateException("Too Many Requests", t));
 	}
 
 }

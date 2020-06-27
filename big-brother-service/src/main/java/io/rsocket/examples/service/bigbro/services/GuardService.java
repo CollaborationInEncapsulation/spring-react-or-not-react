@@ -3,6 +3,7 @@ package io.rsocket.examples.service.bigbro.services;
 import java.util.function.Function;
 
 import io.rsocket.examples.common.model.DecodedLetter;
+import io.rsocket.routing.client.spring.SpringRoutingClient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class GuardService {
 
 	final Function<Mono<Void>, Mono<Void>> responseHandlerFunction;
 	final Mono<RSocketRequester>           rSocketRequesterMono;
+	final SpringRoutingClient              springRoutingClient;
 
 	public Mono<Void> send(DecodedLetter decodedLetter) {
 		GuardRequest request = new GuardRequest().setLetterId(decodedLetter.getAuthor())
@@ -28,6 +30,7 @@ public class GuardService {
 		return rSocketRequesterMono
 			.flatMap(rSocketRequester -> rSocketRequester
 				.route("guard")
+				.metadata(springRoutingClient.address("agent-smith-service"))
 				.data(request)
 				.send()
 				.transform(responseHandlerFunction)

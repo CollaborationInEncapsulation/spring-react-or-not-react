@@ -10,7 +10,12 @@ spring:
   devtools:
     livereload:
       enabled: false
-  rsocket:
-    server:
-      transport: websocket
-      mapping-path: /rsocket
+
+io.rsocket.routing.client:
+  route-id: ${random.uuid}
+  service-name: ${spring.cloud.consul.discovery.service-name}
+  tags:
+    INSTANCE_NAME: ${spring.application.name}
+  brokers:
+    - host: localhost
+      port: 8002

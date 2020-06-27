@@ -27,7 +27,7 @@ public class DecodedLetterController {
 		log.info("Received DecodedLetter={} for analysis", decodedLetter);
 		return pool.withPoolable(worker -> worker.execute(() -> decider.decide(decodedLetter)))
 		           .then()
-		           .onErrorMap(t -> new IllegalStateException("Too Many Requests"));
+		           .onErrorMap(t -> new IllegalStateException("Too Many Requests", t));
 	}
 
 }

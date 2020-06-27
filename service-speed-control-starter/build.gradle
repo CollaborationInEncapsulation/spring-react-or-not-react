@@ -5,7 +5,8 @@ dependencies {
   compile project(":service-common"),
 		  'org.springframework.boot:spring-boot-starter-actuator',
 		  'org.springframework.boot:spring-boot-starter-webflux',
-		  'io.projectreactor.addons:reactor-pool'
+		  'io.projectreactor.addons:reactor-pool',
+		  'io.rsocket.routing:rsocket-routing-client-spring:0.0.2-SNAPSHOT'
 
   implementation 'io.github.resilience4j:resilience4j-ratelimiter',
 		  'io.github.resilience4j:resilience4j-reactor',

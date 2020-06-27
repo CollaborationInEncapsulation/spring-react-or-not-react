@@ -1,0 +1,8 @@
+dependencies {
+  implementation project(':service-common'),
+		  'org.springframework.boot:spring-boot-starter-actuator',
+		  'io.rsocket.routing:rsocket-routing-broker-spring:0.0.1-SNAPSHOT',
+		  'com.netflix.concurrency-limits:concurrency-limits-core:0.3.6'
+
+  runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
+}

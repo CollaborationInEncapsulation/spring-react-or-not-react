@@ -1,0 +1,49 @@
+io:
+  rsocket:
+    routing:
+      broker:
+        broker-id: 00000000-0000-0000-0000-000000000011
+        tcp:
+          port: 8002
+        websocket:
+          port: 9002
+        cluster:
+          port: 7002
+
+
+spring:
+  application:
+    order: 0
+    name: broker-service
+  cloud:
+    consul:
+      discovery:
+        instance-group: broker-service
+        service-name: broker-service
+
+---
+spring:
+  profiles: broker2
+  application:
+    order: 0
+    name: broker-service-1
+
+io:
+  rsocket:
+    routing:
+      broker:
+        broker-id: 00000000-0000-0000-0000-000000000012
+        tcp:
+          port: 8002
+        websocket:
+          port: 9002
+        cluster:
+          port: 7002
+      brokers:
+        - cluster:
+            host: localhost
+            port: 7002
+          proxy:
+            host: localhost
+            port: 8002
+

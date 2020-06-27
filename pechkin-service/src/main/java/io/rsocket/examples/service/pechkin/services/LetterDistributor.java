@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import io.rsocket.examples.common.control.Worker;
 import io.rsocket.examples.service.pechkin.producer.LetterProducer;
+import io.rsocket.routing.client.spring.SpringRoutingClient;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class LetterDistributor extends BaseSubscriber<Void>
 	final Mono<RSocketRequester>           rSocketRequesterMono;
 	final InstrumentedPool<Worker>         pool;
 	final Function<Mono<Void>, Mono<Void>> responseHandlerFunction;
+	final SpringRoutingClient              springRoutingClient;
 
 	@Override
 	public void afterPropertiesSet() {
@@ -41,6 +43,7 @@ public class LetterDistributor extends BaseSubscriber<Void>
 			        .withPoolable(worker -> worker.execute(() -> rSocketRequesterMono
 				        .flatMap(rSocketRequester -> rSocketRequester
 					        .route("analyse.letter")
+					        .metadata(springRoutingClient.address("big-bro-service"))
 					        .data(letter)
 					        .send()
 					        .transform(responseHandlerFunction)

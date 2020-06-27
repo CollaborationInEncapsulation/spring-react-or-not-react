@@ -1,7 +1,6 @@
 package io.rsocket.examples.starter.speed.configuration;
 
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -25,9 +24,11 @@ import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.rsocket.examples.common.control.DefaultLeaseReceiver;
 import io.rsocket.examples.common.control.DistributedConcurrencyLimitedWorker;
 import io.rsocket.examples.common.control.ErrorStrategy;
 import io.rsocket.examples.common.control.LeaseReceiver;
+import io.rsocket.examples.common.control.LeaseWaitingRSocket;
 import io.rsocket.examples.common.control.OverflowStrategy;
 import io.rsocket.examples.common.control.RateLimitedWorker;
 import io.rsocket.examples.common.control.SimpleWorker;
@@ -35,16 +36,14 @@ import io.rsocket.examples.common.control.VegaLimitLeaseSender;
 import io.rsocket.examples.common.control.VegaLimitLeaseStats;
 import io.rsocket.examples.common.control.WaitFreeInstrumentedPool;
 import io.rsocket.examples.common.control.Worker;
-import io.rsocket.examples.common.loadbalancing.ServiceInstanceRSocketSupplier;
 import io.rsocket.examples.common.processing.Delayer;
 import io.rsocket.examples.starter.speed.AdjustmentProperties;
-import io.rsocket.client.LoadBalancedRSocketMono;
-import io.rsocket.client.filter.RSocketSupplier;
 import io.rsocket.lease.Leases;
-import io.rsocket.metadata.WellKnownMimeType;
+import io.rsocket.plugins.RSocketInterceptor;
+import io.rsocket.routing.client.spring.SpringRoutingClient;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Schedulers;
 import reactor.pool.InstrumentedPool;
 import reactor.pool.PoolBuilder;
@@ -54,16 +53,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.hazelcast.HazelcastInstanceFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.rsocket.server.RSocketServerCustomizer;
-import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.rsocket.RSocketRequester;
-import org.springframework.messaging.rsocket.RSocketStrategies;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-
-import static io.rsocket.examples.starter.speed.configuration.RSocketRequesterSetupUtility.getDataMimeType;
 
 /**
  * @author Evgeny Borisov
@@ -79,50 +71,37 @@ public class BaseConfiguration {
 
 	@Bean
 	public Mono<RSocketRequester> rSocketRequester(
-			RSocketStrategies rSocketStrategies,
-			AdjustmentProperties adjustmentProperties,
-			ReactiveDiscoveryClient discoveryClient) {
-		MimeType dataMimeType = getDataMimeType(rSocketStrategies);
-		MimeType metadataMimeType =
-				MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
+			SpringRoutingClient routingClient,
+			VegaLimitLeaseSender leaseSender,
+			AdjustmentProperties properties
+	) {
+		AdjustmentProperties.ProcessingProperties processingProperties = properties.getProcessing();
 
-		return Flux
-			.interval(Duration.ZERO, Duration.ofMillis(1000))
-		    .onBackpressureDrop()
-		    .concatMap(__ ->
-			    discoveryClient
-				    .getInstances(adjustmentProperties.getReceiver().getServiceName())
-					.map(si -> new ServiceInstanceRSocketSupplier(dataMimeType, metadataMimeType, si))
-					.collectList()
-				    .map(l -> (Collection<RSocketSupplier>)(Collection) l),
-		        1
-		    )
-			.as(LoadBalancedRSocketMono::create)
-			.filter(r -> !r.getClass().getSimpleName().contains("FailingRSocket"))
-			.repeatWhenEmpty(f -> f.concatMap(i -> Mono.delay(Duration.ofSeconds(1))))
-			.map(rsocket -> RSocketRequester.wrap(
-					rsocket,
-					dataMimeType,
-					metadataMimeType,
-					rSocketStrategies
-			));
-	}
-
-	@Bean
-	public RSocketServerCustomizer rSocketServerCustomizer(AdjustmentProperties properties, VegaLimitLeaseSender leaseSender) {
-		return rSocketServer -> rSocketServer
-				.lease(() ->
-					Leases.create()
-					      .sender(leaseSender)
-					      .stats(new VegaLimitLeaseStats(
-					      		UUID.randomUUID(),
-					      		leaseSender,
-						        VegasLimit.newBuilder()
-						                  .initialLimit(1)
-						                  .maxConcurrency(properties.getProcessing().getConcurrencyLevel())
-						                  .build()
-					      ))
-				);
+		routingClient.getRSocketRequesterBuilder()
+		             .rsocketConnector(connector -> connector
+			             .interceptors(ir -> ir.forRequester((RSocketInterceptor) r -> new LeaseWaitingRSocket(r, LEASE_RECEIVER.get())))
+			             .lease(() -> {
+				             UUID uuid = UUID.randomUUID();
+				             DefaultLeaseReceiver leaseReceiver =
+								             new DefaultLeaseReceiver(uuid);
+				             LEASE_RECEIVER.set(leaseReceiver);
+				             return Leases
+					             .create()
+					             .stats(new VegaLimitLeaseStats(
+					             		uuid,
+							            leaseSender,
+							            VegasLimit.newBuilder()
+							                      .maxConcurrency(processingProperties.getConcurrencyLevel())
+							                      .initialLimit(1)
+							                      .build()
+					             ))
+					             .sender(leaseSender)
+					             .receiver(leaseReceiver);
+			             })
+		             );
+		return routingClient
+			.connect()
+			.subscribeWith(MonoProcessor.create());
 	}
 
 	@Bean

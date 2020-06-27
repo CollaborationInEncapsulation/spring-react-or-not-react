@@ -13,7 +13,9 @@
         <module name="spring-react-or-not-react.console-dashboard.main" />
         <module name="spring-react-or-not-react.pechkin-service.test" />
         <module name="spring-react-or-not-react.service-speed-control-starter.main" />
+        <module name="spring-react-or-not-react.broker-service.test" />
         <module name="spring-react-or-not-react.pechkin-service.main" />
+        <module name="spring-react-or-not-react.broker-service.main" />
         <module name="spring-react-or-not-react.console-dashboard.test" />
         <module name="spring-react-or-not-react.agent-smith-service.test" />
         <module name="spring-react-or-not-react.service-speed-control-starter.test" />
