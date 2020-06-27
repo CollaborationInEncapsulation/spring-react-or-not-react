@@ -3,5 +3,7 @@ apply plugin: 'org.springframework.boot'
 
 dependencies {
     implementation 'org.codehaus.groovy:groovy-all'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-rsocket'
     runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
 }

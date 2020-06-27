@@ -1,0 +1,26 @@
+letter:
+  receiver:
+    base-url: http://localhost:8081/
+  sender:
+    rate-limit:
+      enabled: true
+      limit: 2
+      period: 2000ms
+      distributed: true
+  processing:
+    time: 0
+    random-delay: 0
+    queue-size: 100
+    concurrency-level: 1
+    overflow-strategy: block
+
+server:
+  port: 8080
+
+spring:
+  devtools:
+    livereload:
+      port: 10580
+  application:
+    order: 0
+    name: pechkin-service

@@ -1,0 +1,33 @@
+letter:
+  receiver:
+    base-url: http://localhost:8082/
+  processing:
+    time: 500
+    random-delay: 0
+    queue-size: 100
+    concurrency-level: 8
+
+
+
+
+
+
+
+server:
+  port: 8081
+logging:
+  level:
+    root: info
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+spring:
+  application:
+    order: 1
+    name: big-bro-service
+  devtools:
+    livereload:
+      port: 10501

@@ -1,0 +1,5 @@
+letter:
+  sender:
+    error-strategy: fail
+  processing:
+    overflow-strategy: terminate

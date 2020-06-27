@@ -1,44 +1,44 @@
 package ru.spring.demo.reactive.bigbro.services;
 
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
+import java.time.Duration;
+import java.util.concurrent.ThreadLocalRandom;
+
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 import ru.spring.demo.reactive.starter.speed.AdjustmentProperties;
 import ru.spring.demo.reactive.starter.speed.model.DecodedLetter;
 import ru.spring.demo.reactive.starter.speed.model.Letter;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Evgeny Borisov
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class LetterDecoder {
-    private final AdjustmentProperties adjustmentProperties;
-    private final Counter              counter;
 
-    public LetterDecoder(AdjustmentProperties adjustmentProperties,
-                         MeterRegistry meterRegistry) {
-        this.adjustmentProperties = adjustmentProperties;
-        counter = meterRegistry.counter("letter.rps");
-    }
+	final AdjustmentProperties adjustmentProperties;
 
-    @SneakyThrows
-    public DecodedLetter decode(Letter letter) {
-        MILLISECONDS.sleep(
-                adjustmentProperties.getProcessingTime()
-        );
+	@SneakyThrows
+	public Mono<DecodedLetter> decode(Letter letter) {
 
-        counter.increment();
+		AdjustmentProperties.ProcessingProperties processing =
+				adjustmentProperties.getProcessing();
+		int constantTime = processing
+				.getTime();
+		int randomDelay = processing.getRandomDelay() == 0 ? 0 :
+				ThreadLocalRandom.current()
+		                                   .nextInt(processing.getRandomDelay());
 
-        return DecodedLetter.builder()
-                .author(letter.secretMethodForDecodeSignature())
-                .location(letter.getLocation())
-                .content(letter.getContent())
-                .build();
-
-    }
+		return Mono.delay(Duration.ofMillis(constantTime + randomDelay))
+		           .map(__ -> DecodedLetter.builder()
+	                                   .author(letter.secretMethodForDecodeSignature())
+	                                   .location(letter.getLocation())
+	                                   .content(letter.getContent())
+	                                   .build());
+	}
 }

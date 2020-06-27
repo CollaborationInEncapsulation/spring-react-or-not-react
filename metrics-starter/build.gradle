@@ -1,0 +1,4 @@
+dependencies {
+  implementation 'io.projectreactor.addons:reactor-pool'
+  implementation 'org.springframework.boot:spring-boot-starter-rsocket'
+}
