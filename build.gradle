@@ -42,8 +42,8 @@ subprojects {
          enforcedPlatform('org.springframework.boot:spring-boot-dependencies:2.3.2.BUILD-SNAPSHOT'),
          platform('org.junit:junit-bom:5.4.0'),
          platform('io.projectreactor:reactor-bom:Dysprosium-SR9'),
-         enforcedPlatform('io.rsocket:rsocket-bom:1.0.1'),
-         platform('io.github.resilience4j:resilience4j-bom:1.5.0')
+         platform('io.github.resilience4j:resilience4j-bom:1.5.0'),
+         platform('org.springframework.cloud:spring-cloud-dependencies:Hoxton.SR6')
         ].each {
             implementation it
             annotationProcessor it
