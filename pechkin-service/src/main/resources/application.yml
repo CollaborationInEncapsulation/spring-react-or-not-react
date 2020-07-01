@@ -1,6 +1,6 @@
 letter:
   receiver:
-    base-url: http://localhost:8080/
+    service-name: big-bro-service
   sender:
     error-strategy: fail
   processing:
@@ -19,3 +19,9 @@ spring:
     order: 0
     id: ""
     name: pechkin-service${spring.application.id}
+  cloud:
+    consul:
+      discovery:
+        instance-group: pechkin-service
+        service-name: pechkin-service
+        instance-id: ${spring.application.id}

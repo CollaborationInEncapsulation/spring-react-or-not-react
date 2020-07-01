@@ -1,6 +1,6 @@
 letter:
   receiver:
-    base-url: http://localhost:8070/
+    service-name:  pechkin-service
   sender:
     error-strategy: retry # needed for scaled mode
   processing:
@@ -19,3 +19,8 @@ spring:
     order: 2
     id: ""
     name: agent-smith-service${spring.application.id}
+  cloud:
+    consul:
+      discovery:
+        instance-group: agent-smith-service
+        service-name: agent-smith-service

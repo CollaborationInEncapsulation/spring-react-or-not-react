@@ -1,6 +1,6 @@
 letter:
   receiver:
-    base-url: http://localhost:8090/
+    service-name: agent-smith-service
   sender:
     error-strategy: fail
   processing:
@@ -19,3 +19,8 @@ spring:
     order: 1
     id: ""
     name: big-bro-service${spring.application.id}
+  cloud:
+    consul:
+      discovery:
+        instance-group: big-bro-service
+        service-name: big-bro-service
