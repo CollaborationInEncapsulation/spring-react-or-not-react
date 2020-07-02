@@ -7,7 +7,7 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.12/48e4e5d60309ebd833bc528dcf77668eab3cd72c/lombok-1.18.12.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/2.3.2.BUILD-SNAPSHOT/d961f9e32e5c078c17a6900d98b27930b2ddc582/spring-boot-configuration-processor-2.3.2.BUILD-SNAPSHOT.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/2.3.2.BUILD-SNAPSHOT/1312a2c750cd57c915bb82e4afe34fdd45a9d044/spring-boot-configuration-processor-2.3.2.BUILD-SNAPSHOT.jar" />
         </processorPath>
         <module name="spring-react-or-not-react.big-brother-service.main" />
         <module name="spring-react-or-not-react.console-dashboard.main" />

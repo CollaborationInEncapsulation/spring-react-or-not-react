@@ -1,2 +1,16 @@
 apply plugin: 'java'
 
+dependencies {
+
+  compile 'org.springframework.boot:spring-boot-starter-actuator',
+		  'org.springframework.boot:spring-boot-starter-webflux',
+		  'io.projectreactor.addons:reactor-pool'
+
+  implementation 'io.github.resilience4j:resilience4j-ratelimiter',
+		  'io.github.resilience4j:resilience4j-reactor',
+		  'com.netflix.concurrency-limits:concurrency-limits-core:0.3.6',
+		  'com.hazelcast:hazelcast',
+		  'com.github.vladimir-bukhtoyarov:bucket4j-core:4.10.0',
+		  'com.github.vladimir-bukhtoyarov:bucket4j-hazelcast-3:4.10.0',
+		  'javax.cache:cache-api:1.1.1'
+}

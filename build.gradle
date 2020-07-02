@@ -28,16 +28,19 @@ subprojects {
         mavenCentral()
         jcenter()
         maven { url 'https://jitpack.io' }
+        maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot' }
+        maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
         maven { url 'https://repo.spring.io/milestone' }
         maven { url 'https://repo.spring.io/snapshot' }
     }
 
     dependencies {
-        [enforcedPlatform('org.springframework.boot:spring-boot-dependencies:2.3.2.BUILD-SNAPSHOT'),
+        [
+         enforcedPlatform('io.rsocket:rsocket-bom:1.0.1'),
+         enforcedPlatform('org.springframework.boot:spring-boot-dependencies:2.3.2.BUILD-SNAPSHOT'),
          platform('org.junit:junit-bom:5.4.0'),
          platform('io.projectreactor:reactor-bom:Dysprosium-SR9'),
-         enforcedPlatform('io.rsocket:rsocket-bom:1.0.1'),
-         platform('io.github.resilience4j:resilience4j-bom:1.5.0')
+         platform('io.github.resilience4j:resilience4j-bom:1.5.0'),
         ].each {
             implementation it
             annotationProcessor it
@@ -80,24 +83,14 @@ subprojects {
             testAnnotationProcessor it
         }
 
-        implementation 'org.springframework.boot:spring-boot-starter-webflux',
-                'org.springframework.boot:spring-boot-starter-rsocket',
-                'org.springframework.boot:spring-boot-starter-actuator',
+        implementation 'org.springframework.boot:spring-boot-starter-rsocket',
                 'io.rsocket:rsocket-transport-netty',
-                'io.projectreactor.addons:reactor-pool',
                 'com.google.guava:guava',
                 'io.dropwizard.metrics:metrics-core',
                 'org.beryx:text-io',
                 'org.beryx:text-io-web',
                 'org.fusesource.jansi:jansi',
-                'io.projectreactor.addons:reactor-extra',
-                'io.github.resilience4j:resilience4j-ratelimiter',
-                'io.github.resilience4j:resilience4j-reactor',
-                'com.netflix.concurrency-limits:concurrency-limits-core:0.3.6',
-                'com.hazelcast:hazelcast',
-                'com.github.vladimir-bukhtoyarov:bucket4j-core:4.10.0',
-                'com.github.vladimir-bukhtoyarov:bucket4j-hazelcast-3:4.10.0',
-                'javax.cache:cache-api:1.1.1'
+                'io.projectreactor.addons:reactor-extra'
 
 
         testImplementation 'org.mockito:mockito-core',
