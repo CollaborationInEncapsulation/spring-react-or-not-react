@@ -14,13 +14,11 @@ letter:
     concurrency-level: 1
     overflow-strategy: block
 
+
 server:
   port: 8080
 
 spring:
-  devtools:
-    livereload:
-      port: 10580
   application:
     order: 0
     name: pechkin-service

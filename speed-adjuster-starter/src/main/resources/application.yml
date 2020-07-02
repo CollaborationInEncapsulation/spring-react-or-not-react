@@ -3,3 +3,10 @@ letter:
     error-strategy: fail
   processing:
     overflow-strategy: terminate
+
+
+
+spring:
+  devtools:
+    livereload:
+      enabled: false

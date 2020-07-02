@@ -8,28 +8,10 @@ letter:
     concurrency-level: 2
 
 
-
-
-
-
-
-
 server:
   port: 8082
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
-logging:
-  level:
-    org.springframework.boot.devtools.autoconfigure: DEBUG
 
 spring:
   application:
     order: 2
     name: agent-smith-service
-  devtools:
-    livereload:
-      port: 10510
