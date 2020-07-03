@@ -1,8 +1,8 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
-    implementation project(':speed-adjuster-starter'),
-            project(':metrics-starter')
+  implementation project(':service-speed-control-starter'),
+		  project(':metrics-starter')
 
-    runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
+  runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
 }
