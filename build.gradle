@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '2.3.2.BUILD-SNAPSHOT' apply false
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'org.springframework.boot' version '2.4.3' apply false
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
 
@@ -36,11 +36,11 @@ subprojects {
 
     dependencies {
         [
-         enforcedPlatform('io.rsocket:rsocket-bom:1.0.1'),
-         enforcedPlatform('org.springframework.boot:spring-boot-dependencies:2.3.2.BUILD-SNAPSHOT'),
+         enforcedPlatform('io.rsocket:rsocket-bom:1.1.1-SNAPSHOT'),
+         enforcedPlatform('org.springframework.boot:spring-boot-dependencies:2.4.3'),
          platform('org.junit:junit-bom:5.4.0'),
-         platform('io.projectreactor:reactor-bom:Dysprosium-SR9'),
-         platform('io.github.resilience4j:resilience4j-bom:1.5.0'),
+         platform('io.projectreactor:reactor-bom:2020.0.4'),
+         platform('io.github.resilience4j:resilience4j-bom:1.7.0'),
         ].each {
             implementation it
             annotationProcessor it
@@ -48,18 +48,18 @@ subprojects {
         }
 
         constraints {
-            ['org.projectlombok:lombok:1.18.2'].each {
+            ['org.projectlombok:lombok:1.18.18'].each {
                 compileOnly it
                 annotationProcessor it
                 testAnnotationProcessor it
             }
 
-            ['com.github.javafaker:javafaker:0.16',
+            ['com.github.javafaker:javafaker:1.0.2',
              'io.dropwizard.metrics:metrics-core:+',
-             'org.beryx:text-io:3.3.0',
-             'org.beryx:text-io-web:3.3.0',
-             'org.fusesource.jansi:jansi:1.17.1',
-             'org.codehaus.groovy:groovy-all:3.0.3',
+             'org.beryx:text-io:3.4.1',
+             'org.beryx:text-io-web:3.4.1',
+             'org.fusesource.jansi:jansi:2.3.1',
+             'org.codehaus.groovy:groovy-all:3.0.7',
              'com.google.guava:guava:27.1-jre',
             ].each {
                 implementation it

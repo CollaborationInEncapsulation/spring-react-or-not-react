@@ -6,21 +6,23 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.12/48e4e5d60309ebd833bc528dcf77668eab3cd72c/lombok-1.18.12.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/2.3.2.BUILD-SNAPSHOT/1312a2c750cd57c915bb82e4afe34fdd45a9d044/spring-boot-configuration-processor-2.3.2.BUILD-SNAPSHOT.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.18/481f5bfed3ae29f656eedfe9e98c8365b8ba5c57/lombok-1.18.18.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/2.4.3/d4bb8ef775bcf06ac9a4fdc400a8b2404259c457/spring-boot-configuration-processor-2.4.3.jar" />
         </processorPath>
         <module name="spring-react-or-not-react.big-brother-service.main" />
         <module name="spring-react-or-not-react.console-dashboard.main" />
         <module name="spring-react-or-not-react.pechkin-service.test" />
+        <module name="spring-react-or-not-react.service-speed-control-starter.main" />
+        <module name="spring-react-or-not-react.pechkin-service.main" />
         <module name="spring-react-or-not-react.console-dashboard.test" />
         <module name="spring-react-or-not-react.agent-smith-service.test" />
+        <module name="spring-react-or-not-react.service-speed-control-starter.test" />
         <module name="spring-react-or-not-react.agent-smith-service.main" />
         <module name="spring-react-or-not-react.metrics-starter.test" />
-        <module name="spring-react-or-not-react.speed-adjuster-starter.main" />
+        <module name="spring-react-or-not-react.service-common.test" />
         <module name="spring-react-or-not-react.big-brother-service.test" />
         <module name="spring-react-or-not-react.metrics-starter.main" />
-        <module name="spring-react-or-not-react.pechkin-service.main" />
-        <module name="spring-react-or-not-react.speed-adjuster-starter.test" />
+        <module name="spring-react-or-not-react.service-common.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="11" />

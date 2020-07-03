@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=io.rsocket.examples.starter.speed.configuration.BaseConfiguration
