@@ -2,7 +2,10 @@ apply plugin: 'org.springframework.boot'
 
 dependencies {
     implementation project(':service-speed-control-starter'),
-            project(':metrics-starter')
+            project(':metrics-starter'),
+            'io.projectreactor.addons:reactor-pool',
+            'io.rsocket:rsocket-core',
+            'io.rsocket:rsocket-transport-netty'
 
     runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
 }

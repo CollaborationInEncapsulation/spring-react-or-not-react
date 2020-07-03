@@ -12,6 +12,7 @@ allprojects {
 
 repositories {
     mavenCentral()
+    mavenLocal()
     jcenter()
     maven { url 'https://jitpack.io' }
     maven { url 'https://repo.spring.io/milestone' }
@@ -26,6 +27,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
         jcenter()
         maven { url 'https://jitpack.io' }
         maven { url 'https://oss.jfrog.org/artifactory/libs-snapshot' }
@@ -84,6 +86,7 @@ subprojects {
         }
 
         implementation 'org.springframework.boot:spring-boot-starter-rsocket',
+                'io.rsocket:rsocket-core',
                 'io.rsocket:rsocket-transport-netty',
                 'com.google.guava:guava',
                 'io.dropwizard.metrics:metrics-core',
