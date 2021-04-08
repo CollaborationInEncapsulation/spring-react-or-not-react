@@ -26,6 +26,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.stereotype.Component;
 
 import static java.util.Map.entry;
@@ -46,18 +47,20 @@ public class RatesMetricsReporter extends BaseSubscriber<Void> implements
 		return o;
 	});
 
-	final MetricRegistry           metricRegistry;
-	final InstrumentedPool<?>      pool;
-	final RSocketRequester.Builder rSocketRequesterBuilder;
-	final AtomicBoolean            status;
-	final String                   serviceName;
-	final int                      order;
+	final MetricRegistry      metricRegistry;
+	final InstrumentedPool<?> pool;
+	final RSocketStrategies   strategies;
+	final AtomicBoolean       status;
+	final String              serviceName;
+	final int                 order;
 
 
 	@Override
 	public void afterPropertiesSet() {
 		final RSocketRequester rSocketRequester =
-			rSocketRequesterBuilder
+			RSocketRequester
+				.builder()
+				.rsocketStrategies(strategies)
 				.rsocketConnector(connector ->
 					connector
 						.reconnect(

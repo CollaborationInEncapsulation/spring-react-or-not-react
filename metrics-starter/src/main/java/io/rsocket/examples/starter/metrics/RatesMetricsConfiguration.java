@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.messaging.rsocket.RSocketStrategies;
 
 @Configuration
 @AutoConfigureBefore(SimpleMetricsExportAutoConfiguration.class)
@@ -62,10 +63,10 @@ public class RatesMetricsConfiguration {
 	@Bean
 	public RatesMetricsReporter ratesMetricsEndpoint(MetricRegistry m,
 			InstrumentedPool<?> pool,
-			RSocketRequester.Builder builder,
+			RSocketStrategies strategies,
 			@Qualifier("letter.status") AtomicBoolean status,
 			@Value("${spring.application.order}") int order,
 			@Value("${spring.application.name}") String serviceName) {
-		return new RatesMetricsReporter(m, pool, builder, status, serviceName, order);
+		return new RatesMetricsReporter(m, pool, strategies, status, serviceName, order);
 	}
 }
