@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'base'
 
 allprojects {
-    group 'ru.spring.reactive.in.practice'
+    group 'io.rsocket.examples'
 }
 
 repositories {
