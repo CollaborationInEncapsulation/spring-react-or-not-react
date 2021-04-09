@@ -1,0 +1,4 @@
+letter:
+  sender:
+    rate-limit:
+      distributed: true

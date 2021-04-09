@@ -1,0 +1,6 @@
+letter:
+  sender:
+    rate-limit:
+      enabled: true
+      limit: 8
+      period: 500ms

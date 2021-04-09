@@ -39,11 +39,12 @@ import reactor.util.retry.Retry;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.hazelcast.HazelcastInstanceFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import static com.hazelcast.core.Hazelcast.newHazelcastInstance;
 
 /**
  * @author Evgeny Borisov
@@ -66,7 +67,7 @@ public class BaseConfiguration {
 	public HazelcastInstance hazelcastInstance() {
 		Config config = new Config();
 
-		return new HazelcastInstanceFactory(config).getHazelcastInstance();
+		return newHazelcastInstance(config);
 	}
 
 	@Bean
@@ -111,12 +112,18 @@ public class BaseConfiguration {
 				.maxPendingAcquire(processingProperties.getQueueSize())
 				.sizeBetween(processingProperties.getConcurrencyLevel(), processingProperties.getConcurrencyLevel())
 				.evictionPredicate((wc, metadata) -> false)
-				.lifo();
+				.buildPool();
 
 		if (processingProperties.getOverflowStrategy() == OverflowStrategy.BLOCK) {
 			return pool;
 		}
-		return new WaitFreeInstrumentedPool<>(pool, processingProperties.getOverflowStrategy());
+
+		AdjustmentProperties.SenderProperties senderProperties =
+				adjustmentProperties.getSender();
+
+		return new WaitFreeInstrumentedPool<>(pool,
+				processingProperties.getOverflowStrategy(),
+				senderProperties.getErrorStrategy());
 	}
 
 	@Bean

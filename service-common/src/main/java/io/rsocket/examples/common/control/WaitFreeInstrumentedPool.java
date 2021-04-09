@@ -19,6 +19,7 @@ public class WaitFreeInstrumentedPool<POOLABLE> implements InstrumentedPool<POOL
 
 	final InstrumentedPool<POOLABLE> origin;
 	final OverflowStrategy           overflowStrategy;
+	final ErrorStrategy              errorStrategy;
 
 	@Override
 	public PoolMetrics metrics() {
@@ -38,7 +39,7 @@ public class WaitFreeInstrumentedPool<POOLABLE> implements InstrumentedPool<POOL
 					}
 				})
 				.doOnError(__ -> {
-					if (overflowStrategy == OverflowStrategy.TERMINATE) {
+					if (overflowStrategy == OverflowStrategy.TERMINATE || errorStrategy == ErrorStrategy.FAIL) {
 						dispose();
 					}
 				});

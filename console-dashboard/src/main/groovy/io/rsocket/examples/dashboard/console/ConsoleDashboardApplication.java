@@ -1,5 +1,7 @@
 package io.rsocket.examples.dashboard.console;
 
+import reactor.core.publisher.Hooks;
+
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +14,7 @@ public class ConsoleDashboardApplication {
 
     public static void main(String[] args) {
         System.setProperty("jansi.passthrough", "true");
+        Hooks.onErrorDropped(__ -> {});
         new SpringApplicationBuilder(ConsoleDashboardApplication.class)
                 .headless(true)
                 .web(WebApplicationType.NONE)

@@ -1,0 +1,21 @@
+letter:
+  receiver:
+    base-url: http://localhost:8090/
+  sender:
+    error-strategy: fail
+  processing:
+    time: 500
+    random-delay: 0
+    queue-size: 100
+    concurrency-level: 8
+    overflow-strategy: block
+
+
+server:
+  port: 8080
+
+spring:
+  application:
+    order: 1
+    id: ""
+    name: big-bro-service${spring.application.id}

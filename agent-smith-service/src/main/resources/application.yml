@@ -1,0 +1,21 @@
+letter:
+  receiver:
+    base-url: http://localhost:8070/
+  sender:
+    error-strategy: retry # needed for scaled mode
+  processing:
+    time: 2000
+    random-delay: 0
+    queue-size: 10
+    concurrency-level: 2
+    overflow-strategy: block
+
+
+server:
+  port: 8090
+
+spring:
+  application:
+    order: 2
+    id: ""
+    name: agent-smith-service${spring.application.id}

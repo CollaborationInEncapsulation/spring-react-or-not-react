@@ -1,12 +1,8 @@
 letter:
   receiver:
-    base-url: http://localhost:8081/
+    base-url: http://localhost:8080/
   sender:
-    rate-limit:
-      enabled: true
-      limit: 2
-      period: 2000ms
-      distributed: true
+    error-strategy: fail
   processing:
     time: 0
     random-delay: 0
@@ -16,9 +12,10 @@ letter:
 
 
 server:
-  port: 8080
+  port: 8070
 
 spring:
   application:
     order: 0
-    name: pechkin-service
+    id: ""
+    name: pechkin-service${spring.application.id}

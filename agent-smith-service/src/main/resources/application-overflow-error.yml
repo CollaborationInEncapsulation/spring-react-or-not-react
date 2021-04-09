@@ -1,0 +1,3 @@
+letter:
+  processing:
+    overflow-strategy: error
